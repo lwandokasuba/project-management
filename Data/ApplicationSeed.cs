@@ -15,7 +15,7 @@ public class SeedData
         if (context == null || context.Projects == null)
         {
             throw new NullReferenceException(
-                "Null BlazorWebAppMoviesContext or Movie DbSet");
+                "Null ApplicationDbContext or Projects DbSet");
         }
 
         if (context.Projects.Any())
