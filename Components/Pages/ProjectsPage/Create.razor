@@ -21,6 +21,11 @@
         <ValidationMessage For="() => Project.Name" class="text-danger" />
       </div>
       <div class="mb-3">
+        <label for="description" class="form-label">Description:</label>
+        <InputText id="description" aria-required="true" @bind-Value="Project.Description" class="form-control" />
+        <ValidationMessage For="() => Project.Description" class="text-danger" />
+      </div>
+      <div class="mb-3">
         <label for="startdate" class="form-label">Start Date:</label>
         <InputDate id="startdate" @bind-Value="Project.StartDate" class="form-control" />
         <ValidationMessage For="() => Project.StartDate" class="text-danger" />
