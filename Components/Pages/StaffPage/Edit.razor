@@ -1,0 +1,108 @@
+@page "/staff/edit"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Staff</h2>
+<hr />
+@if (staff is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="staff" OnValidSubmit="UpdateStaff" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="staff.StaffId" value="@staff.StaffId" />
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <InputText id="name" @bind-Value="staff.Name" class="form-control" />
+                    <ValidationMessage For="() => staff.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Position:</label>
+                    <InputText id="description" @bind-Value="staff.Position" class="form-control" />
+                    <ValidationMessage For="() => staff.Position" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="startdate" class="form-label">Hire Date:</label>
+                    <InputDate id="startdate" @bind-Value="staff.HireDate" class="form-control" />
+                    <ValidationMessage For="() => staff.HireDate" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                  <label for="status" class="form-label">Status:</label>
+                  <InputSelect id="status" @bind-Value="staff.Status" class="form-select">
+                    <option value="">Select...</option>
+                    @foreach (var status in Enum.GetValues(typeof(StaffStatus)))
+                    {
+                        <option value="@status">@status</option>
+                    }
+                  </InputSelect>
+                  <ValidationMessage For="() => staff.Status" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/staff">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Staff? staff { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        staff ??= await context.Staffs.FirstOrDefaultAsync(m => m.StaffId == Id);
+
+        if (staff is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task UpdateStaff()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(staff!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!projectExists(staff!.StaffId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/staff");
+    }
+
+    private bool projectExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Staffs.Any(e => e.StaffId == id);
+    }
+}
