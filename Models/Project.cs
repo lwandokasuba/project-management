@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Projects.Models
 {
   public class Project : BaseEntity
@@ -8,6 +10,7 @@ namespace Projects.Models
     public required DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public required ProjectStatus Status { get; set; } = ProjectStatus.CREATED;
+    public Assignment[]? Assignments { get; set; } = [];
   }
 
   public enum ProjectStatus
