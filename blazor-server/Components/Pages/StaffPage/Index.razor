@@ -1,5 +1,6 @@
 @page "/staff"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.QuickGrid
 @using Projects.Models
@@ -7,34 +8,36 @@
 @implements IAsyncDisposable
 @inject IDbContextFactory<ApplicationDbContext> DbFactory
 
+@attribute [Authorize]
+
 <PageTitle>Index</PageTitle>
 
-<h1>Index</h1>
+<h1>Staff Page</h1>
 
-<div>
-    <input type="search" @bind="nameFilter" @bind:event="oninput" />
-</div>
+        <div>
+            <input type="search" @bind="nameFilter" @bind:event="oninput" />
+        </div>
 
-<p>
-    <a href="staff/create">Create New</a>
-</p>
+        <p>
+            <a href="staff/create">Create New</a>
+        </p>
 
-<div>
-    <QuickGrid Class="table" Items="FilteredStaff" Pagination="pagination">
-        <PropertyColumn Property="staff => staff.Name" Sortable="true" />
-        <PropertyColumn Property="staff => staff.Position" />
-        <PropertyColumn Property="staff => staff.HireDate" />
-        <PropertyColumn Property="staff => staff.Status" />
+        <div>
+            <QuickGrid Class="table" Items="FilteredStaff" Pagination="pagination">
+                <PropertyColumn Property="staff => staff.Name" Sortable="true" />
+                <PropertyColumn Property="staff => staff.Position" />
+                <PropertyColumn Property="staff => staff.HireDate" />
+                <PropertyColumn Property="staff => staff.Status" />
 
-        <TemplateColumn Context="staff">
-            <a href="@($"staff/edit?id={staff.StaffId}")">Edit</a> |
-            <a href="@($"staff/details?id={staff.StaffId}")">Details</a> |
-            <a href="@($"staff/delete?id={staff.StaffId}")">Delete</a>
-        </TemplateColumn>
-    </QuickGrid>
-</div>
+                <TemplateColumn Context="staff">
+                    <a href="@($"staff/edit?id={staff.StaffId}")">Edit</a> |
+                    <a href="@($"staff/details?id={staff.StaffId}")">Details</a> |
+                    <a href="@($"staff/delete?id={staff.StaffId}")">Delete</a>
+                </TemplateColumn>
+            </QuickGrid>
+        </div>
 
-<Paginator State="pagination" />
+        <Paginator State="pagination" />
 
 @code {
     private ApplicationDbContext context = default!;
