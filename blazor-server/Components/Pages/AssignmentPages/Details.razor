@@ -1,0 +1,67 @@
+﻿@page "/assignments/details"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Assignment</h2>
+    <hr />
+    @if (assignment is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Title</dt>
+            <dd class="col-sm-10">@assignment.Title</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@assignment.Description</dd>
+            <dt class="col-sm-2">Project</dt>
+            <dd class="col-sm-10">@(assignment.Project != null ? assignment.Project.Name : String.Empty)</dd>
+            <dt class="col-sm-2">Staff</dt>
+            <dd class="col-sm-10">@(assignment.Staff != null ? assignment.Staff.Name : String.Empty)</dd>
+            <dt class="col-sm-2">StartDate</dt>
+            <dd class="col-sm-10">@assignment.StartDate</dd>
+            <dt class="col-sm-2">EndDate</dt>
+            <dd class="col-sm-10">@assignment.EndDate</dd>
+            <dt class="col-sm-2">Status</dt>
+            <dd class="col-sm-10">@assignment.Status</dd>
+            <dt class="col-sm-2">CreatedAt</dt>
+            <dd class="col-sm-10">@assignment.CreatedAt</dd>
+            <dt class="col-sm-2">UpdatedAt</dt>
+            <dd class="col-sm-10">@assignment.UpdatedAt</dd>
+        </dl>
+        <div>
+            <a href="@($"/assignments/edit?assignmentid={assignment.AssignmentId}")">Edit</a> |
+            <a href="@($"/projects/Details?id={assignment.ProjectId}")">View Project</a> |
+            <a href="@($"/staff/Details?id={assignment.StaffId}")">View Staff</a> |
+            <a href="@($"/assignments")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Assignment? assignment;
+
+    [SupplyParameterFromQuery]
+    private int AssignmentId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        assignment = await context.Assignments
+                .Include(a => a.Staff)
+        .Include(a => a.Project)
+        .FirstOrDefaultAsync(m => m.AssignmentId == AssignmentId);
+
+        if (assignment is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

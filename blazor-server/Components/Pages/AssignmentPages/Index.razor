@@ -1,0 +1,61 @@
+﻿@page "/assignments"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using Projects.Models
+@using Projects.Data
+@implements IAsyncDisposable
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+
+@attribute [Authorize]
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<div>
+    <input type="search" @bind="titleFilter" @bind:event="oninput" />
+</div>
+
+<p>
+    <a href="assignments/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="FilteredAssignments">  
+   <PropertyColumn Property="assignment => assignment.Title" />  
+   <PropertyColumn Property="assignment => assignment.Description" />  
+   <PropertyColumn Property="assignment => assignment.Project != null ? assignment.Project.Name : String.Empty" Title="Project" />
+    <PropertyColumn Property="assignment => assignment.Staff != null ? assignment.Staff.Name : String.Empty" Title="Staff" />
+    <PropertyColumn Property="assignment => assignment.StartDate" />  
+   <PropertyColumn Property="assignment => assignment.EndDate" />  
+   <PropertyColumn Property="assignment => assignment.Status" />  
+   <PropertyColumn Property="assignment => assignment.CreatedAt" />  
+   <PropertyColumn Property="assignment => assignment.UpdatedAt" />  
+
+   <TemplateColumn Context="assignment">  
+       <a href="@($"assignments/edit?assignmentid={assignment.AssignmentId}")">Edit</a> |  
+       <a href="@($"assignments/details?assignmentid={assignment.AssignmentId}")">Details</a> |  
+       <a href="@($"assignments/delete?assignmentid={assignment.AssignmentId}")">Delete</a>  
+   </TemplateColumn>  
+</QuickGrid>
+
+<Paginator State="pagination" />
+
+@code {
+    private ApplicationDbContext context = default!;
+    private PaginationState pagination = new PaginationState { ItemsPerPage = 5 };
+    private string titleFilter = string.Empty;
+
+    private IQueryable<Assignment> FilteredAssignments =>
+        context.Assignments
+        .Include(a => a.Staff)
+        .Include(a => a.Project)
+        .Where(m => m.Title!.Contains(titleFilter));
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
