@@ -15,11 +15,6 @@
         <EditForm method="post" Model="Expense" OnValidSubmit="AddExpense" FormName="create" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="assignmentid" class="form-label">AssignmentId:</label>
-                <InputNumber id="assignmentid" @bind-Value="Expense.AssignmentId" class="form-control" />
-                <ValidationMessage For="() => Expense.AssignmentId" class="text-danger" />
-            </div>
 
             <div class="mb-3">
                 <label for="amount" class="form-label">Amount:</label> 
@@ -50,11 +45,8 @@
     private int AssignmentId { get; set; }
 
     [SupplyParameterFromForm]
-    private Expense Expense { get; set; } = new()
+    private ExpenseDTO Expense { get; set; } = new()
     {
-			AssignmentId = 1,
-			CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
 			Date = DateTime.UtcNow,
             Amount = 0,
     };
@@ -63,9 +55,16 @@
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddExpense()
     {
-        Expense.AssignmentId = AssignmentId;
         using var context = DbFactory.CreateDbContext();
-        context.Expenses.Add(Expense);
+        context.Expenses.Add(new()
+        {
+				AssignmentId = AssignmentId,
+				CreatedAt = DateTime.UtcNow,
+				UpdatedAt = DateTime.UtcNow,
+				Date = Expense.Date,
+				Amount = Expense.Amount,
+				Description = Expense.Description
+        });
         await context.SaveChangesAsync();
         NavigationManager.NavigateTo($"/expenses?assignmentId={AssignmentId}");
     }

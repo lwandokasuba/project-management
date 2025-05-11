@@ -9,4 +9,11 @@ namespace Projects.Models
     public required DateTime Date { get; set; } = DateTime.UtcNow;
     public string? Description { get; set; } = string.Empty;
   }
+
+    public class ExpenseDTO
+    {
+        public decimal Amount { get; set; }
+        public DateTime Date { get; set; } = DateTime.UtcNow;
+        public string? Description { get; set; } = string.Empty;
+    }
 }
