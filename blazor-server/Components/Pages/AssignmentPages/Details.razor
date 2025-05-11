@@ -35,6 +35,10 @@
             <dd class="col-sm-10">@assignment.CreatedAt</dd>
             <dt class="col-sm-2">UpdatedAt</dt>
             <dd class="col-sm-10">@assignment.UpdatedAt</dd>
+            <dt class="col-sm-2">Total Expenses</dt>
+            <dd class="col-sm-10">ZMW @(assignment.Expenses != null ? assignment.Expenses.Sum(s => s.Amount) : 0)</dd>
+            <dt class="col-sm-2">Total Gains</dt>
+            <dd class="col-sm-10">ZMW @(assignment.Gains != null ? assignment.Gains.Sum(s => s.Amount) : 0)</dd>
         </dl>
         <div>
             <a href="@($"/assignments/edit?assignmentid={assignment.AssignmentId}")">Edit</a> |
@@ -58,7 +62,9 @@
         using var context = DbFactory.CreateDbContext();
         assignment = await context.Assignments
                 .Include(a => a.Staff)
-        .Include(a => a.Project)
+                .Include(a => a.Project)
+                .Include(a => a.Expenses)
+                .Include(a => a.Gains)
         .FirstOrDefaultAsync(m => m.AssignmentId == AssignmentId);
 
         if (assignment is null)
