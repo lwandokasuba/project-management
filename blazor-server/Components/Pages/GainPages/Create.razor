@@ -14,12 +14,7 @@
     <div class="col-md-4">
         <EditForm method="post" Model="Gain" OnValidSubmit="AddGain" FormName="create" Enhance>
             <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert"/>
-            <div class="mb-3">
-                <label for="assignmentid" class="form-label">AssignmentId:</label> 
-                <InputNumber id="assignmentid" @bind-Value="Gain.AssignmentId" class="form-control" /> 
-                <ValidationMessage For="() => Gain.AssignmentId" class="text-danger" /> 
-            </div>        
+            <ValidationSummary class="text-danger" role="alert"/>       
             <div class="mb-3">
                 <label for="amount" class="form-label">Amount:</label> 
                 <InputNumber id="amount" @bind-Value="Gain.Amount" class="form-control" /> 
@@ -34,17 +29,7 @@
                 <label for="description" class="form-label">Description:</label> 
                 <InputText id="description" @bind-Value="Gain.Description" class="form-control" /> 
                 <ValidationMessage For="() => Gain.Description" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="createdat" class="form-label">CreatedAt:</label> 
-                <InputDate id="createdat" @bind-Value="Gain.CreatedAt" class="form-control" /> 
-                <ValidationMessage For="() => Gain.CreatedAt" class="text-danger" /> 
-            </div>        
-            <div class="mb-3">
-                <label for="updatedat" class="form-label">UpdatedAt:</label> 
-                <InputDate id="updatedat" @bind-Value="Gain.UpdatedAt" class="form-control" /> 
-                <ValidationMessage For="() => Gain.UpdatedAt" class="text-danger" /> 
-            </div>        
+            </div>               
             <button type="submit" class="btn btn-primary">Create</button>
         </EditForm>
     </div>
@@ -59,11 +44,9 @@
     private int AssignmentId { get; set; }
 
     [SupplyParameterFromForm]
-    private Gain Gain { get; set; } = new()
+    private GainDTO Gain { get; set; } = new()
         {
-            AssignmentId = 1,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
+
             Date = DateTime.UtcNow,
             Amount = 0,
         };
@@ -71,10 +54,17 @@
     // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
     private async Task AddGain()
     {
-        Gain.AssignmentId = AssignmentId;
         using var context = DbFactory.CreateDbContext();
-        context.Gains.Add(Gain);
+        context.Gains.Add(new()
+        {
+                AssignmentId = AssignmentId,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Date = Gain.Date,
+                Amount = Gain.Amount,
+                Description = Gain.Description
+        });
         await context.SaveChangesAsync();
-        NavigationManager.NavigateTo("/gains");
+        NavigationManager.NavigateTo($"/gains?assignmentId={AssignmentId}");
     }
 }
