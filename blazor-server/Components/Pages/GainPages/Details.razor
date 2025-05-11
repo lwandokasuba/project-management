@@ -1,0 +1,56 @@
+﻿@page "/gains/details"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Gain</h2>
+    <hr />
+    @if (gain is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">AssignmentId</dt>
+            <dd class="col-sm-10">@gain.AssignmentId</dd>
+            <dt class="col-sm-2">Amount</dt>
+            <dd class="col-sm-10">@gain.Amount</dd>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@gain.Date</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@gain.Description</dd>
+            <dt class="col-sm-2">CreatedAt</dt>
+            <dd class="col-sm-10">@gain.CreatedAt</dd>
+            <dt class="col-sm-2">UpdatedAt</dt>
+            <dd class="col-sm-10">@gain.UpdatedAt</dd>
+        </dl>
+        <div>
+            <a href="@($"/gains/edit?gainid={gain.GainId}")">Edit</a> |
+            <a href="@($"/gains")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Gain? gain;
+
+    [SupplyParameterFromQuery]
+    private int GainId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        gain = await context.Gains.FirstOrDefaultAsync(m => m.GainId == GainId);
+
+        if (gain is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}
