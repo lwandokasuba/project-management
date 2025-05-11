@@ -1,0 +1,56 @@
+﻿@page "/expenses/details"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Expense</h2>
+    <hr />
+    @if (expense is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">AssignmentId</dt>
+            <dd class="col-sm-10">@expense.AssignmentId</dd>
+            <dt class="col-sm-2">Amount</dt>
+            <dd class="col-sm-10">@expense.Amount</dd>
+            <dt class="col-sm-2">Date</dt>
+            <dd class="col-sm-10">@expense.Date</dd>
+            <dt class="col-sm-2">Description</dt>
+            <dd class="col-sm-10">@expense.Description</dd>
+            <dt class="col-sm-2">CreatedAt</dt>
+            <dd class="col-sm-10">@expense.CreatedAt</dd>
+            <dt class="col-sm-2">UpdatedAt</dt>
+            <dd class="col-sm-10">@expense.UpdatedAt</dd>
+        </dl>
+        <div>
+            <a href="@($"/expenses/edit?expenseid={expense.ExpenseId}")">Edit</a> |
+            <a href="@($"/expenses")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Expense? expense;
+
+    [SupplyParameterFromQuery]
+    private int ExpenseId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        expense = await context.Expenses.FirstOrDefaultAsync(m => m.ExpenseId == ExpenseId);
+
+        if (expense is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

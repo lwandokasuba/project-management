@@ -1,0 +1,72 @@
+﻿@page "/expenses/create"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Create</PageTitle>
+
+<h1>Create</h1>
+
+<h2>Expense</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <EditForm method="post" Model="Expense" OnValidSubmit="AddExpense" FormName="create" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert"/>
+            <div class="mb-3">
+                <label for="assignmentid" class="form-label">AssignmentId:</label>
+                <InputNumber id="assignmentid" @bind-Value="Expense.AssignmentId" class="form-control" />
+                <ValidationMessage For="() => Expense.AssignmentId" class="text-danger" />
+            </div>
+
+            <div class="mb-3">
+                <label for="amount" class="form-label">Amount:</label> 
+                <InputNumber id="amount" @bind-Value="Expense.Amount" class="form-control" /> 
+                <ValidationMessage For="() => Expense.Amount" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="date" class="form-label">Date:</label> 
+                <InputDate id="date" @bind-Value="Expense.Date" class="form-control" /> 
+                <ValidationMessage For="() => Expense.Date" class="text-danger" /> 
+            </div>        
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label> 
+                <InputText id="description" @bind-Value="Expense.Description" class="form-control" /> 
+                <ValidationMessage For="() => Expense.Description" class="text-danger" /> 
+            </div>                
+            <button type="submit" class="btn btn-primary">Create</button>
+        </EditForm>
+    </div>
+</div>
+
+<div>
+    <a href="/expenses">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int AssignmentId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Expense Expense { get; set; } = new()
+    {
+			AssignmentId = 1,
+			CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+			Date = DateTime.UtcNow,
+            Amount = 0,
+    };
+
+
+    // To protect from overposting attacks, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task AddExpense()
+    {
+        Expense.AssignmentId = AssignmentId;
+        using var context = DbFactory.CreateDbContext();
+        context.Expenses.Add(Expense);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo($"/expenses?assignmentId={AssignmentId}");
+    }
+}

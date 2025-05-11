@@ -1,0 +1,114 @@
+﻿@page "/expenses/edit"
+@using Microsoft.EntityFrameworkCore
+@using Projects.Models
+@inject IDbContextFactory<Projects.Data.ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Expense</h2>
+<hr />
+@if (Expense is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Expense" OnValidSubmit="UpdateExpense" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Expense.ExpenseId" value="@Expense.ExpenseId" />
+                <div class="mb-3">
+                    <label for="assignmentid" class="form-label">AssignmentId:</label>
+                    <InputNumber id="assignmentid" @bind-Value="Expense.AssignmentId" class="form-control" />
+                    <ValidationMessage For="() => Expense.AssignmentId" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="amount" class="form-label">Amount:</label>
+                    <InputNumber id="amount" @bind-Value="Expense.Amount" class="form-control" />
+                    <ValidationMessage For="() => Expense.Amount" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">Date:</label>
+                    <InputDate id="date" @bind-Value="Expense.Date" class="form-control" />
+                    <ValidationMessage For="() => Expense.Date" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description:</label>
+                    <InputText id="description" @bind-Value="Expense.Description" class="form-control" />
+                    <ValidationMessage For="() => Expense.Description" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="createdat" class="form-label">CreatedAt:</label>
+                    <InputDate id="createdat" @bind-Value="Expense.CreatedAt" class="form-control" />
+                    <ValidationMessage For="() => Expense.CreatedAt" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="updatedat" class="form-label">UpdatedAt:</label>
+                    <InputDate id="updatedat" @bind-Value="Expense.UpdatedAt" class="form-control" />
+                    <ValidationMessage For="() => Expense.UpdatedAt" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/expenses">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int ExpenseId { get; set; }
+
+    [SupplyParameterFromForm]
+    private Expense? Expense { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Expense ??= await context.Expenses.FirstOrDefaultAsync(m => m.ExpenseId == ExpenseId);
+
+        if (Expense is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateExpense()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Expense!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!ExpenseExists(Expense!.ExpenseId))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/expenses");
+    }
+
+    private bool ExpenseExists(int expenseid)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Expenses.Any(e => e.ExpenseId == expenseid);
+    }
+}
