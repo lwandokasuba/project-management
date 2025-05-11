@@ -10,7 +10,7 @@ namespace Projects.Models
     public required DateTime StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public required ProjectStatus Status { get; set; } = ProjectStatus.CREATED;
-    public Assignment[]? Assignments { get; set; } = [];
+    public List<Assignment>? Assignments { get; set; } = [];
   }
 
   public enum ProjectStatus

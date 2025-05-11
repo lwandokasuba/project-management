@@ -10,8 +10,8 @@ namespace Projects.Models
     public required DateTime HireDate { get; set; } = DateTime.UtcNow;
     public DateTime? TerminationDate { get; set; }
     public required StaffStatus Status { get; set; } = StaffStatus.ACTIVE;
-    public Assignment[]? Assignments { get; set; } = [];
-    public required string UserId { get; set; }
+    public List<Assignment>? Assignments { get; set; } = [];
+    public string? UserId { get; set; }
     public ApplicationUser? User { get; set; }
   }
 

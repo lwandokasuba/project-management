@@ -9,8 +9,8 @@ namespace Projects.Models
     public Project? Project { get; set; }
     public required int StaffId { get; set; }
     public Staff? Staff { get; set; }
-    public Expense[]? Expenses { get; set; } = [];
-    public Gain[]? Gains { get; set; } = [];
+    public List<Expense>? Expenses { get; set; } = [];
+    public List<Gain>? Gains { get; set; } = [];
     public required DateTime StartDate { get; set; } = DateTime.UtcNow;
     public DateTime? EndDate { get; set; }
     public required AssignmentStatus Status { get; set; } = AssignmentStatus.ACTIVE;
