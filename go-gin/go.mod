@@ -1,4 +1,4 @@
-module gin
+module github.com/lwandokasuba/project-management
 
 go 1.24.4
 
