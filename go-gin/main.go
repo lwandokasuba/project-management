@@ -41,7 +41,7 @@ func main() {
 func connectDB(cfg config) *ent.Client {
 	client, err := ent.Open("postgres", "host="+cfg.DATABASE_HOST+" user="+cfg.DATABASE_USER+
 		" password="+cfg.DATABASE_PASSWORD+" dbname="+cfg.DATABASE_NAME+
-		" port="+cfg.DATABASE_PORT+" sslmode=disable")
+		" port="+cfg.DATABASE_PORT+" timezone="+cfg.DATABASE_TIMEZONE+" sslmode=disable")
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
@@ -60,6 +60,7 @@ type config struct {
 	DATABASE_HOST     string `env:"DATABASE_HOST" envDefault:"localhost"`
 	DATABASE_PORT     string `env:"DATABASE_PORT" envDefault:"5432"`
 	DATABASE_NAME     string `env:"DATABASE_NAME" envDefault:"database"`
+	DATABASE_TIMEZONE string `env:"DATABASE_TIMEZONE" envDefault:"Africa/Lusaka"`
 }
 
 func loadEnv() config {
