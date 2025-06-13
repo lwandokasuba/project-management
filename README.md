@@ -6,3 +6,4 @@ This repository contains a project management system built using different frame
 
 ### Frameworks Used
 - **Blazor**: A modern web framework for building interactive web applications in C#.
+- **Gin**: The fastest full-featured web framework for Go. Crystal clear.
