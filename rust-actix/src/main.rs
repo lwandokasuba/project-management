@@ -1,28 +1,60 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{App, Error, HttpResponse, HttpServer, web};
+use confik::{Configuration as _, EnvSource};
+use deadpool_postgres::{Client, Pool};
+use dotenvy::dotenv;
+use tokio_postgres::NoTls;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
+use crate::config::ExampleConfig;
+
+mod config;
+mod db;
+mod errors;
+mod models;
+
+use self::{errors::MyError, models::User};
+
+pub async fn get_users(db_pool: web::Data<Pool>) -> Result<HttpResponse, Error> {
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
+
+    let users = db::get_users(&client).await?;
+
+    Ok(HttpResponse::Ok().json(users))
 }
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
+pub async fn add_user(
+    user: web::Json<User>,
+    db_pool: web::Data<Pool>,
+) -> Result<HttpResponse, Error> {
+    let user_info: User = user.into_inner();
 
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+    let client: Client = db_pool.get().await.map_err(MyError::PoolError)?;
+
+    let new_user = db::add_user(&client, user_info).await?;
+
+    Ok(HttpResponse::Ok().json(new_user))
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(hello)
-            .service(echo)
-            .route("/hey", web::get().to(manual_hello))
+    dotenv().ok();
+
+    let config = ExampleConfig::builder()
+        .override_with(EnvSource::new())
+        .try_build()
+        .unwrap();
+
+    let pool = config.pg.create_pool(None, NoTls).unwrap();
+
+    let server = HttpServer::new(move || {
+        App::new().app_data(web::Data::new(pool.clone())).service(
+            web::resource("/users")
+                .route(web::post().to(add_user))
+                .route(web::get().to(get_users)),
+        )
     })
-    .bind(("127.0.0.1", 8080))?
-    .run()
-    .await
+    .bind(config.server_addr.clone())?
+    .run();
+    println!("Server running at http://{}/", config.server_addr);
+
+    server.await
 }
